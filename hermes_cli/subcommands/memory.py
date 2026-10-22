@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 from typing import Callable
 
 from hermes_cli.subcommands._shared import add_yes_flag
@@ -23,6 +24,13 @@ def build_memory_parser(subparsers, *, cmd_memory: Callable) -> None:
     _setup_parser.add_argument(
         "provider", nargs="?", default=None,
         help="Provider to configure directly (e.g. honcho), skipping the picker")
+    # Providers read their own setup options from argv in ``post_setup`` (mem0: --mode oss ...);
+    # REMAINDER keeps argparse from rejecting options it does not know.
+    _setup_parser.add_argument(
+        "provider_args", nargs=argparse.REMAINDER, metavar="...",
+        help="Options for the provider's own setup, after its name "
+             "(e.g. mem0 --mode oss --dry-run); see the provider's docs")
+    _setup_parser.set_defaults(memory_setup_parser=_setup_parser)
     memory_sub.add_parser("status", help="Show current memory provider config")
     memory_sub.add_parser("off", help="Disable external provider (built-in only)")
     _reset_parser = memory_sub.add_parser(

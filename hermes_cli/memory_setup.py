@@ -445,6 +445,10 @@ def memory_command(args) -> None:
         from pm.package import InstallError
 
         provider = getattr(args, "provider", None)
+        # REMAINDER also swallows -h/--help after a provider name; show help, don't run setup.
+        if {"-h", "--help"} & set(getattr(args, "provider_args", None) or ()):
+            args.memory_setup_parser.print_help()
+            return
         try:
             if provider:
                 cmd_setup_provider(provider)
